@@ -1,0 +1,75 @@
+---
+title: "Experiment with Exponential Distribution and Central Limit Theorem"
+author: "Xiaowen Wang"
+date: "May 23, 2015"
+output: pdf_document
+---
+# Overview
+In this report we will simulate a exponential distribution with lambda equals to 0.2, 1000 times to compare with central limit theorem. Followings are the 3 main aspects we're going to discuss about. 
+
+1. Compare sample mean to the theoretical mean of the distribution.
+2. Compare variance to the theoretical variance of the distribution.
+3. Is the distribution is approximately normal?
+
+# Simulation 
+create a list named "m" and a list named "v" to record the mean and variance of every run, there are totally 1000 run. 
+```{r}
+m = c()
+v = c()
+for(i in 1:1000){
+    myRun <- rexp(40, 0.2)
+    m[i] = mean(myRun)
+    v[i] = var(myRun)
+}
+```
+# Sample Mean versus Theoretical Mean
+
+## Find Sample mean and compare to the theoretical mean 
+give the sample mean named "sm" and theoretical mean named "tm" as following:
+```{r}
+sm = mean(m)
+tm = 1/0.2
+sm
+tm
+```
+
+## Hypothesis Testing about the mean
+Ho: sm = tm
+Ha: sm != tm
+```{r}
+t.test(x=m, mu=tm, alternative="two.sided")
+```
+
+According to the result, we failed to reject the null hypothesis. That's say, we have 95% condidentce to say the sample maen equals to the theoretical mean.
+
+# Sample Variance versus Theoretical Variance
+## Find sample variance and compare to theoretical variance
+give the sample variance mean named "sv" and theoretical variance as "tv" as following:
+```{r}
+sv = mean(v)
+tv = (1/0.2)^2
+sv
+tv
+```
+
+## Hypothesis Testing about the variance
+Ho: sv = tv
+Ha: sv != tv
+```{r}
+t.test(x=v,mu=tv,alternative="two.sided")
+```
+According to the result, we failed to reject the null hypothesis. That's say, we have 95% condidentce to say the sample variance equals to the theoretical variance.
+
+# Distribution
+
+## Graph comparison
+standard deviation of sample mean named "s". We show the histgram of sample mean and compare to the normal distribution mean as 5, variance as 0.6 
+```{r}
+s = sd(m)
+p1 <- hist(m,border="green",main="Compare Sample Mean to Normal")
+myNorm <- rnorm(1000,mean=5,sd=s)
+p2 <- hist(myNorm,border="blue",add=T)
+legend('topright',legend=c("sample mean","normal distribution"),lty=1,col=c("green","blue"))
+```
+
+According to the histgram, we can apporxiately say the sample mean of the 1000 try of 40 exponential distribution is normal distributed. 

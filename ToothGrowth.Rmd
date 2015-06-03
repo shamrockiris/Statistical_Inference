@@ -1,0 +1,135 @@
+---
+title: "ToothGrowth Data Report"
+author: "Xiaowen Wang"
+date: "May 23, 2015"
+output: pdf_document
+---
+
+# Overview 
+In this report we will use a dataset about ToothGrowth in R package. WE will do the following actions with this dataset:
+
+1. Perform basic exploratory data analyses 
+2. Provide a basic summary of the data.
+3 Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose.
+4. State assumptions and conclusion.
+
+
+# Load the Data 
+```{r}
+data(ToothGrowth)
+head(ToothGrowth)
+names(ToothGrowth)
+dim(ToothGrowth)
+```
+We know there are three columns of data, they're "len","supp" and "dose".
+There are 60 observations in this dataset.
+
+# Basic Exploratory Data Analysis about this dataset
+First, according to the two VC delivery method, we want to subset the dataset.
+```{r}
+vc <- subset(ToothGrowth,supp=="VC")
+oj <- subset(ToothGrowth,supp=="OJ")
+```
+
+we want to look at a brief summary about the data.
+```{r}
+summary(ToothGrowth)
+summary(vc)
+summary(oj)
+```
+
+Second,we want to know how the numeric Tooth length distributed and what's sample mean(lb) and standard deviation(s) of len. We will draw a histgram and box plot to have a basic idea.
+```{r}
+par(mfrow=c(2,2),mar=c(2,2,2,2))
+hist(vc$len,main="ascorbic acid delivery method",col="green")
+boxplot(vc$len,main="ascorbic acid delivery method",col="green")
+points(mean(vc$len),col="red",pch=18)
+hist(oj$len,main="range juice delivery method",col="blue")
+boxplot(oj$len,main="orange juice delivery method",col="blue")
+points(mean(oj$len),col="yellow",pch=18)
+lb1 = mean(vc$len)
+s1 = sd(vc$len)
+lb2 = mean(oj$len)
+s2 = sd(oj$len)
+```
+
+According to the boxplot, we can see the length of tooth are quite balanced distributed on the two sides of mean value, but it's hard to tell if it's a normal distribution. So we try to do a two sample t test, to see if length is normal distributed with mean of 18.81,standard deviation of 7.65.
+```{r}
+dd1 <- rnorm(30,mean=lb1,sd=s1)
+t.test(vc$len,dd1,paired=FALSE,var.equal=TRUE)
+dd2 <- rnorm(30,mean=lb2,sd=s2)
+t.test(oj$len,dd2,paired=FALSE,var.equal=TRUE)
+```
+
+According to the result, we have 95% condifence to say length is a normal distribution in both VC delevery method experiment group. 
+
+Third, we want see if there's any relationship between length and dose. x axis is the dose, y axis is the length.
+```{r}
+par(mfrow=c(2,1),mar=c(2,2,2,2))
+plot(y=vc$len,x=vc$dose,col="green",pch=18,main="ascorbic acid",xlab="dose(mg)",ylab="tooth length")
+plot(y=oj$len,x=oj$dose,col="blue",pch=18,main="orange juice",xlab="dose(mg)",ylab="tooth length")
+```
+
+According to the graph, we can see as the dose increse, the tooth length increase. 
+
+Forth, we want to see how the two group length compare to each other. 
+```{r}
+par(mfrow=c(1,1))
+plot(y=ToothGrowth$len,x=ToothGrowth$supp,col="yellow")
+```
+
+We can guess orange juice has more significant affect than ascorbic acid method to help tooth grow longer. 
+
+# Summay and assumptions after exploratory analysis
+1. The tooth length of either groups is a 95% confidence normal distribution.
+2. Give more mg of dose help the tooth grow longer.
+3. Give orange juice has more significant affects on helping the tooth grow longer. 
+
+# Use Hypothesis Test 
+
+## Compare Tooth Growth by Supp 
+Null Hypothesis is that different supply makes no difference on tooth growth.
+Ho: lb2 = lb1
+Ha: lb2 > lb1
+
+To prove our assumption that orange juice make tooth longer, we need to reject the null hypothesis and prove lb1 is larger than lb2.
+```{r}
+t.test(oj$len,vc$len,paired=FALSE)
+```
+According to the result, we can't reject the null hypothesis, which means there's no significant increase in tooth length when we use orange juice. 
+
+## Compare Tooth Growth by Dose.
+Null Hypothesis is that different mg of dose makes no difference on tooth growth. We need to compare 3 times: 0.5mg to 1.0mg; 1.0mg to 2.0mg; 0.5mg to 2.0mg.
+We subset the dataset into 3 groups.
+```{r}
+g1 <- subset(ToothGrowth,dose==0.5)
+g2 <- subset(ToothGrowth,dose==1.0)
+g3 <- subset(ToothGrowth,dose==2.0)
+```
+1. First comparison(0.5mg to 1.0mg of dose)
+Ho: mu1 = mu2
+Ha: mu1 < mu2
+```{r}
+t.test(g1$len,g2$len,paired=FALSE)
+```
+According to the result , as p < 0.05, we can reject the null hypothesis, that's say there is significant different between these two groups. Compared to 0.5mg, 1.0mg of dose makes the tooth grow longer.
+
+2. Second comparison(1.0mg to 2.0mg of dose)
+Ho: mu2 = mu3
+Ha: mu2 < mu3
+```{r}
+t.test(g2$len,g3$len,paired=FALSE)
+```
+According to the result , as p < 0.05, we can reject the null hypothesis, that's say there is significant different between these two groups. Compared to 1.0mg, 2.0mg of dose makes the tooth grow longer.
+
+2. Third comparison(0.5mg to 2.0mg of dose)
+Ho: mu1 = mu3
+Ha: mu1 < mu3
+```{r}
+t.test(g1$len,g3$len,paired=FALSE)
+```
+According to the result , as p < 0.05, we can reject the null hypothesis, that's say there is significant different between these two groups. Compared to 0.5mg, 2.0mg of dose makes the tooth grow longer.
+
+# Conclusion
+1. Giving orange juice or ascorbic acid as Vitamin C source doesn't make significant difference on the tooth growth.
+2. Giving more dose of Vitamin C makes the tooth grow longer. 
